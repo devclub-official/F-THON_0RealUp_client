@@ -1,12 +1,24 @@
-import "./App.css";
+import React, { useState } from 'react';
+import ThreePanelLayout from './components/ThreePanelLayout';
+import OnboardingForm from './components/OnboardingForm'; // 온보딩 폼 import
 
 function App() {
+  const [onboardingDone, setOnboardingDone] = useState(false);
+  const [userData, setUserData] = useState(null); // 선택된 온보딩 데이터 저장
+
+  const handleOnboardingComplete = (formData) => {
+    setUserData(formData);          // 선택된 데이터 저장 (원하면 서버에 전송 가능)
+    setOnboardingDone(true);        // 온보딩 완료 플래그 ON
+  };
+
   return (
-    <main className="flex justify-center gap-4 flex-col min-h-screen">
-      <h1 className="text-3xl text-center font-bold underline">React & Tailwind CSS Starter Pack</h1>
-      <p className="text-center text-xl">This is a starter pack for React & Tailwind CSS projects.</p>
-      <img src="https://bit.ly/3wsmzTy" alt="meme" className="mx-auto" />
-    </main>
+    <div>
+      {!onboardingDone ? (
+        <OnboardingForm onComplete={handleOnboardingComplete} />
+      ) : (
+        <ThreePanelLayout userData={userData} />
+      )}
+    </div>
   );
 }
 
