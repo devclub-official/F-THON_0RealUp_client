@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 const levelOptions = ["입문", "중급", "상급"];
 const dailyOptions = [1, 2, 3];
-const problemTypes = ["그리디", "구현", "DP", "그래프", "DFS/BFS", "이분 탐색"];
+const problemTypes = ["수학", "구현", "탐욕", "문자열", "그래프", "dp","기하학"];
 const hardTypes = ["DFS", "다익스트라", "세그먼트 트리"];
 
 const OnboardingForm = ({ onComplete }) => {
@@ -29,15 +29,28 @@ const OnboardingForm = ({ onComplete }) => {
     );
   };
 
+  const problemMapping = {
+    수학: "math",
+    구현: "implementation",
+    탐욕: "greedy",
+    문자열: "string",
+    "데이터 구조": "data_structures",
+    그래프: "graphs",
+    dp: "dp",
+    기하학: "geometry",
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true); // 제출 상태 시작
     setSuccessMessage(""); // 성공 메시지 초기화
+
+    const mostSolvedMapping = problemMapping[formData.mostSolved] || null;
     
     const onboardingData = {
       level,
       dailyCount,
-      mostSolved,
+      mostSolvedMapping,
       hardest,
     };
     if (onComplete) {
@@ -45,12 +58,12 @@ const OnboardingForm = ({ onComplete }) => {
     }
 
     try {
-      const response = await fetch("/api/onboarding", {
+      const response = await fetch("http://10.10.98.13:8080/onboarding", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData), // 폼 데이터를 JSON으로 변환하여 전송
+        body: JSON.stringify(onboardingData), // 폼 데이터를 JSON으로 변환하여 전송
       });
 
       if (!response.ok) {

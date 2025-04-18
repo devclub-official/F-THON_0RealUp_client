@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import AchievementCal from './Achievement';
 import BubbleChartView from './BubbleChart';
 import GaugeChart from './GaugeChart';
@@ -43,7 +43,7 @@ const ThreePanelLayout = () => {
         const fetchListItems = async () => {
             setLoading(true); // 로딩 시작
             try {
-                const response = await fetch('/feedbacks?memberId=1'); // 백엔드 API 호출
+                const response = await fetch('http://10.10.98.13:8080/feedbacks?memberId=1'); // 백엔드 API 호출
                 const data = await response.json(); // JSON 데이터 파싱
                 setListItems(data); // 리스트 상태 업데이트
             } catch (error) {
@@ -61,12 +61,38 @@ const ThreePanelLayout = () => {
     const [code, setCode] = useState(''); // 코드 상태
     const [feedback, setFeedback] = useState(''); // 피드백 상태
     const [showDetails, setShowDetails] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false); // 알림 표시 상태
+    const [notifications, setNotifications] = useState([
+        { id: 1, message: '새로운 메일이 도착했습니다.', date: '2025-04-19' },
+        { id: 2, message: '새로운 메일이 도착했습니다.', date: '2025-04-19' },
+        { id: 3, message: '시스템 업데이트 알림.', date: '2025-04-19' },
+    ]); // 알림 데이터
+
+    const dropdownRef = useRef(null); // 드롭다운 참조
+
+    const toggleNotifications = () => {
+        setShowNotifications((prev) => !prev); // 알림 표시 상태 토글
+    };
+
+    // 드롭다운 외부 클릭 감지
+    useEffect(() => {
+        const handleClickOutside = (event) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+                setShowNotifications(false); // 드롭다운 닫기
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
 
     const handleItemClick = async (item) => {
         setSelectedItem(item); // 선택된 항목 설정
         try {
-            // const response = await fetch(`/api/feedbacks/${item.id}`); // 백엔드 API 호출
-            const response = await fetch('https://reqres.in/api/users?page=2'); // 예시 API 호출
+            const response = await fetch(`http://10.10.98.13:8080/feedbacks/${item.id}`); // 백엔드 API 호출
+            //const response = await fetch('https://reqres.in/api/users?page=2'); // 예시 API 호출
             const data = await response.json(); // JSON 데이터 파싱
             setCode(data.code); // 코드 업데이트
             setFeedback(data.feedback); // 피드백 업데이트
@@ -93,7 +119,7 @@ const ThreePanelLayout = () => {
                             className="h-8 w-8 object-cover"
                         />
                         <h1 className="text-2xl font-extrabold bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text text-transparent tracking-tight">
-                            코트핏
+                            코드핏
                         </h1>
                     </div>
 
@@ -110,13 +136,43 @@ const ThreePanelLayout = () => {
                 </div>
 
                 <div className="flex items-center space-x-4">
-                    <button className="relative p-1.5 rounded-full hover:bg-gray-100">
+                    <button
+                        className="relative p-1.5 rounded-full hover:bg-gray-100"
+                        onClick={toggleNotifications} // 클릭 시 알림 표시 상태 토글
+                    >
                         <Bell className="h-5 w-5 text-gray-600" />
                         <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
                     </button>
                     <button className="p-1 rounded-full bg-indigo-100">
                         <User className="h-5 w-5 text-indigo-600" />
                     </button>
+                    {/* 알림 드롭다운 */}
+                    {showNotifications && (
+                        <div
+                            ref={dropdownRef} // 드롭다운 참조 설정
+                            className="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg z-10"
+                            style={{ top: '40px' }} // Bell 아이콘 바로 아래로 위치
+                        >
+                            <div className="p-4 border-b border-gray-200">
+                                <h3 className="text-sm font-semibold text-gray-800">알림</h3>
+                            </div>
+                            <ul className="max-h-60 overflow-y-auto">
+                                {notifications.length > 0 ? (
+                                    notifications.map((notification) => (
+                                        <li
+                                            key={notification.id}
+                                            className="p-4 hover:bg-gray-100 cursor-pointer"
+                                        >
+                                            <p className="text-sm text-gray-700">{notification.message}</p>
+                                            <p className="text-xs text-gray-500">{notification.date}</p>
+                                        </li>
+                                    ))
+                                ) : (
+                                    <li className="p-4 text-sm text-gray-500">알림이 없습니다.</li>
+                                )}
+                            </ul>
+                        </div>
+                    )}
                 </div>
             </header>
 
@@ -224,10 +280,7 @@ const ThreePanelLayout = () => {
                                     }`}>
                                     {selectedItem?.difficulty}
                                 </span>
-                                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${selectedItem?.solved ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                                    }`}>
-                                    {selectedItem?.solved ? '해결됨' : '미해결'}
-                                </span>
+
                             </div>
                         </div>
 
@@ -251,7 +304,7 @@ const ThreePanelLayout = () => {
                                 </div>
                                 <div className="bg-indigo-50 p-4 rounded-lg mb-4">
                                     <p className="text-sm text-gray-700 whitespace-pre-line">
-                                        {feedback || '피드백을 불러오는 중...'}
+                                        <ReactMarkdown>{feedback || '피드백을 불러오는 중...'}</ReactMarkdown>
                                     </p>
                                 </div>
 
