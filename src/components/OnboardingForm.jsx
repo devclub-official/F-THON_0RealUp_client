@@ -44,13 +44,14 @@ const OnboardingForm = ({ onComplete }) => {
     e.preventDefault();
     setIsSubmitting(true); // 제출 상태 시작
     setSuccessMessage(""); // 성공 메시지 초기화
-
-    const mostSolvedMapping = problemMapping[formData.mostSolved] || null;
     
+    console.log("mostSolved", mostSolved);
+    const mostSolvedMapped = problemMapping[mostSolved] || null;
+
     const onboardingData = {
       level,
       dailyCount,
-      mostSolvedMapping,
+      mostSolved: mostSolvedMapped,
       hardest,
     };
     if (onComplete) {
@@ -58,7 +59,7 @@ const OnboardingForm = ({ onComplete }) => {
     }
 
     try {
-      const response = await fetch("http://10.10.98.13:8080/onboarding", {
+      const response = await fetch("http://10.10.98.13:8080/members/1/onboarding", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

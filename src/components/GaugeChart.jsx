@@ -13,10 +13,10 @@ import Gauge from "react-svg-gauge";
 
 const GaugeChart = () => {
   const [gauges, setGauges] = useState([{ value: 23, color: "#7561f2", label: "그리디" },
-    { value: 60, color: "#a857f9", label: "구현" },
+    { value: 60, color: "#a857f9", label: "수학" },
     { value: 50, color: "#ca4ec7", label: "DP" },
     { value: 25, color: "#d94198", label: "DFS" },
-    { value: 75, color: "#e3459b", label: "이분 탐색" },
+    { value: 75, color: "#e3459b", label: "기하학" },
     { value: 64, color: "#e7499f", label: "그래프" }]); // gauges 상태 초기화
   const [loading, setLoading] = useState(true); // 로딩 상태 추가
 

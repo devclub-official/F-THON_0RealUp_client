@@ -23,6 +23,16 @@ const ThreePanelLayout = () => {
         }))
     ); // 리스트 상태 초기화
     const [loading, setLoading] = useState(true); // 로딩 상태 추가
+    const [selectedItem, setSelectedItem] = useState(null);
+    const [code, setCode] = useState(''); // 코드 상태
+    const [feedback, setFeedback] = useState(''); // 피드백 상태
+    const [showDetails, setShowDetails] = useState(false);
+    const [showNotifications, setShowNotifications] = useState(false); // 알림 표시 상태
+    const [notifications, setNotifications] = useState([
+        { id: 1, message: '새로운 메일이 도착했습니다.', date: '2025-04-19' },
+        { id: 2, message: '새로운 메일이 도착했습니다.', date: '2025-04-19' },
+    ]); // 알림 데이터
+    const dropdownRef = useRef(null); // 드롭다운 참조
 
     // 가상 데이터 - 스크롤 가능한 리스트용
     // const listItems = Array.from({ length: 20 }, (_, i) => ({
@@ -56,22 +66,30 @@ const ThreePanelLayout = () => {
         fetchListItems();
     }, []); // 컴포넌트가 마운트될 때 한 번 실행
 
-    // 선택된 항목 및 세부 정보 보기 상태 관리
-    const [selectedItem, setSelectedItem] = useState(null);
-    const [code, setCode] = useState(''); // 코드 상태
-    const [feedback, setFeedback] = useState(''); // 피드백 상태
-    const [showDetails, setShowDetails] = useState(false);
-    const [showNotifications, setShowNotifications] = useState(false); // 알림 표시 상태
-    const [notifications, setNotifications] = useState([
-        { id: 1, message: '새로운 메일이 도착했습니다.', date: '2025-04-19' },
-        { id: 2, message: '새로운 메일이 도착했습니다.', date: '2025-04-19' },
-        { id: 3, message: '시스템 업데이트 알림.', date: '2025-04-19' },
-    ]); // 알림 데이터
-
-    const dropdownRef = useRef(null); // 드롭다운 참조
 
     const toggleNotifications = () => {
         setShowNotifications((prev) => !prev); // 알림 표시 상태 토글
+    };
+
+    const handleUserClick = async () => {
+        try {
+            const response = await fetch('http://10.10.98.13:8080/member/1', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ action: 'user_clicked' }), // 요청 본문 데이터
+            });
+
+            if (!response.ok) {
+                throw new Error('서버 응답이 올바르지 않습니다.');
+            }
+
+            const result = await response.json();
+            console.log('백엔드 응답:', result);
+        } catch (error) {
+            console.error('POST 요청 중 오류 발생:', error);
+        }
     };
 
     // 드롭다운 외부 클릭 감지
@@ -92,7 +110,6 @@ const ThreePanelLayout = () => {
         setSelectedItem(item); // 선택된 항목 설정
         try {
             const response = await fetch(`http://10.10.98.13:8080/feedbacks/${item.id}`); // 백엔드 API 호출
-            //const response = await fetch('https://reqres.in/api/users?page=2'); // 예시 API 호출
             const data = await response.json(); // JSON 데이터 파싱
             setCode(data.code); // 코드 업데이트
             setFeedback(data.feedback); // 피드백 업데이트
@@ -143,7 +160,7 @@ const ThreePanelLayout = () => {
                         <Bell className="h-5 w-5 text-gray-600" />
                         <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full"></span>
                     </button>
-                    <button className="p-1 rounded-full bg-indigo-100">
+                    <button className="p-1 rounded-full bg-indigo-100" onClick={handleUserClick}>
                         <User className="h-5 w-5 text-indigo-600" />
                     </button>
                     {/* 알림 드롭다운 */}

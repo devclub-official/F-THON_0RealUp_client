@@ -20,7 +20,7 @@ const AchievementCal = ({ selectedYear }) => {
     const fetchData = async () => {
       setLoading(true); // 로딩 시작
       try {
-        const response = await fetch(`/api/achievement?year=${selectedYear}`); // 백엔드 API 호출
+        const response = await fetch(`http://10.10.98.13:8080/members/1/solved-counts?year=${selectedYear}`); // 백엔드 API 호출
 
 
         const data = await response.json(); // JSON 데이터 파싱
